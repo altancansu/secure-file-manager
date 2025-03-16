@@ -36,22 +36,24 @@ const Index = () => {
           </p>
         </div>
         
-        {files.length === 0 ? (
-          <div className="max-w-xl mx-auto mb-10">
-            <DropZone onFilesAdded={handleFileUpload} />
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-            <div className="space-y-6">
-              <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
-                <div className="mb-6">
-                  <DropZone onFilesAdded={handleFileUpload} />
+        <div className="max-w-4xl mx-auto">
+          {files.length === 0 ? (
+            <div className="max-w-xl mx-auto mb-10">
+              <DropZone onFilesAdded={handleFileUpload} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+              <div className="space-y-6">
+                <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
+                  <div className="mb-6">
+                    <DropZone onFilesAdded={handleFileUpload} />
+                  </div>
+                  
+                  <FileList 
+                    files={files} 
+                    onRemoveFile={removeFile} 
+                  />
                 </div>
-                
-                <FileList 
-                  files={files} 
-                  onRemoveFile={removeFile} 
-                />
               </div>
               
               <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
@@ -70,8 +72,8 @@ const Index = () => {
                 />
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </main>
     </div>
   );
