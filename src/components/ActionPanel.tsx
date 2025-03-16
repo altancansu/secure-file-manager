@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   FileType, 
@@ -48,7 +47,6 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   hasActions,
   activeActions
 }) => {
-  const [showActionMenu, setShowActionMenu] = useState(false);
   const [activeActionType, setActiveActionType] = useState<string | null>(null);
   
   const [convertOptions, setConvertOptions] = useState<ConvertOptions>({
@@ -78,7 +76,6 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   
   const handleActionSelect = (actionType: string) => {
     setActiveActionType(actionType);
-    setShowActionMenu(false);
   };
   
   const handleAddAction = () => {
@@ -380,9 +377,9 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   
   return (
     <div className="space-y-6">
-      {/* Added Actions */}
+      {/* Added Actions - Displayed as a stack */}
       {activeActions.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-4 mb-6">
           {activeActions.map((action, index) => (
             <div 
               key={index} 
@@ -421,54 +418,9 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       )}
       
-      {/* Action Selection */}
-      {!activeActionType && (
-        <>
-          {activeActions.length === 0 ? (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Please select what you want</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {actionOptions.map((option) => (
-                  <ActionButton
-                    key={option.id}
-                    onClick={() => handleActionSelect(option.id)}
-                    label={option.label}
-                    icon={option.icon}
-                    className="justify-start text-left"
-                    disabled={!hasFiles}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Add other options</p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                {actionOptions.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleActionSelect(option.id)}
-                    disabled={!hasFiles}
-                    className="flex items-center justify-center space-x-2 py-3 px-4 
-                    bg-dark-secondary/50 hover:bg-dark-secondary/80
-                    border border-dark-accent/10 rounded-lg
-                    transition-colors disabled:opacity-50"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>{option.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-      
       {/* Action Configuration */}
       {activeActionType && (
-        <div className="bg-dark-secondary/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-dark-accent/20 animate-scale-in">
+        <div className="bg-dark-secondary/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-dark-accent/20 animate-scale-in mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium">
               {getActionTypeLabel(activeActionType)}
@@ -498,7 +450,56 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       )}
       
-      {/* Action Controls */}
+      {/* Action Buttons - Displayed as individual buttons */}
+      {!activeActionType && (
+        <>
+          {activeActions.length === 0 ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Please select what you want to do with your files:</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {actionOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleActionSelect(option.id)}
+                    disabled={!hasFiles}
+                    className="flex items-center justify-center space-x-2 py-3 px-4 
+                    bg-dark-secondary/50 hover:bg-dark-secondary/80
+                    border border-dark-accent/10 rounded-lg
+                    transition-colors disabled:opacity-50"
+                  >
+                    {option.icon}
+                    <span>{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Add other actions:</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {actionOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleActionSelect(option.id)}
+                    disabled={!hasFiles}
+                    className="flex items-center justify-center space-x-2 py-3 px-4 
+                    bg-dark-secondary/50 hover:bg-dark-secondary/80
+                    border border-dark-accent/10 rounded-lg
+                    transition-colors disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    <span>{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      
+      {/* Action Controls - Save action set and Process & Download buttons */}
       <div className="flex justify-between items-center pt-6 border-t border-dark-accent/20">
         <button
           onClick={onSaveActionSet}

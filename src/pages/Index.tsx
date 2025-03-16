@@ -56,24 +56,22 @@ const Index = () => {
               )}
             </div>
             
-            {/* Actions Section - Always below the file upload box */}
+            {/* Actions Section - Outside of container as individual buttons */}
             {files.length > 0 && (
-              <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
-                <ActionPanel 
-                  activeActions={activeActions}
-                  onAddConvertAction={addConvertAction}
-                  onAddCombineAction={addCombineAction}
-                  onAddReduceSizeAction={addReduceSizeAction}
-                  onAddRenameAction={addRenameAction}
-                  onAddCompressAction={addCompressAction}
-                  onSaveActionSet={saveActionSet}
-                  onProcessActions={processActions}
-                  onRemoveAction={removeAction}
-                  isProcessing={isProcessing}
-                  hasFiles={files.length > 0}
-                  hasActions={activeActions.length > 0}
-                />
-              </div>
+              <ActionPanel 
+                activeActions={activeActions}
+                onAddConvertAction={addConvertAction}
+                onAddCombineAction={addCombineAction}
+                onAddReduceSizeAction={addReduceSizeAction}
+                onAddRenameAction={addRenameAction}
+                onAddCompressAction={addCompressAction}
+                onSaveActionSet={saveActionSet}
+                onProcessActions={processActions}
+                onRemoveAction={removeAction}
+                isProcessing={isProcessing}
+                hasFiles={files.length > 0}
+                hasActions={activeActions.length > 0}
+              />
             )}
           </div>
         </div>
