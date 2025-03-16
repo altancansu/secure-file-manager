@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   FileType, 
@@ -10,8 +9,8 @@ import {
 } from '@/types';
 import ActionButton from './ActionButton';
 import { 
-  FileConvert, FilesIcon, ImageIcon, Download, Save, Trash2, Plus,
-  RefreshCw, FileArchive, FileText, FileSpreadsheet, FilePdf, PenLine
+  FileUp, FilesIcon, ImageIcon, Download, Save, Trash2, Plus,
+  RefreshCw, FileArchive, FileText, FileSpreadsheet, FileJson, PenLine
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -45,37 +44,31 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
 }) => {
   const [activeAction, setActiveAction] = useState<string | null>(null);
   
-  // Convert action state
   const [convertOptions, setConvertOptions] = useState<ConvertOptions>({
     targetFormat: 'pdf',
     mode: 'all'
   });
   
-  // Combine action state
   const [combineOptions, setCombineOptions] = useState<CombineOptions>({
     mode: 'sameFormat',
     outputFormat: 'pdf'
   });
   
-  // Reduce size action state
   const [reduceOptions, setReduceOptions] = useState<ReduceOptions>({
     mode: 'optimize',
     maxSize: 10
   });
   
-  // Rename action state
   const [renameOptions, setRenameOptions] = useState<RenameOptions>({
     mode: 'addAfter',
     text: ''
   });
   
-  // Compress action state
   const [compressOptions, setCompressOptions] = useState<CompressOptions>({
     outputName: 'compressed_files',
     format: 'zip'
   });
   
-  // Toggle active action
   const toggleAction = (action: string) => {
     if (activeAction === action) {
       setActiveAction(null);
@@ -84,7 +77,6 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
     }
   };
   
-  // Handle add action based on type
   const handleAddAction = () => {
     if (!activeAction) return;
     
@@ -106,16 +98,14 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         break;
     }
     
-    // Reset active action after adding
     setActiveAction(null);
   };
   
-  // Action buttons
   const actionButtons = [
     {
       id: 'convert',
       label: 'Convert file to other format',
-      icon: <FileConvert className="w-5 h-5" />,
+      icon: <FileUp className="w-5 h-5" />,
       component: (
         <div className="space-y-4 mt-4 animate-fade-in">
           <div className="space-y-2">
@@ -379,7 +369,6 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
                 setRenameOptions({
                   ...renameOptions,
                   text,
-                  // Create an example based on the first file
                   example: text ? `Example: ${
                     renameOptions.mode === 'addBefore' ? 
                     `${text}Filename.ext` : `Filename${text}.ext`
@@ -427,7 +416,6 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       )}
       
-      {/* Show active action configuration */}
       {activeAction && (
         <div className="action-panel animate-scale-in">
           <div className="flex items-center justify-between mb-4">

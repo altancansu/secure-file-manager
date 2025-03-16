@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { FileItem as FileItemType } from '@/types';
 import { formatFileSize } from '@/lib/fileUtils';
 import { Trash2 } from 'lucide-react';
 import { 
-  FileText, FilePdf, FileSpreadsheet, ImageIcon, 
+  FileText, FileJson, FileSpreadsheet, ImageIcon, 
   CheckCircle2
 } from 'lucide-react';
 
@@ -21,7 +20,7 @@ const FileItem: React.FC<FileItemProps> = ({ file, onRemove }) => {
       case 'docx':
         return <FileText className="w-6 h-6" />;
       case 'pdf':
-        return <FilePdf className="w-6 h-6" />;
+        return <FileJson className="w-6 h-6" />;
       case 'xls':
         return <FileSpreadsheet className="w-6 h-6" />;
       case 'png':
