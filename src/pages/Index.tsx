@@ -37,14 +37,13 @@ const Index = () => {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          {files.length === 0 ? (
-            <div className="max-w-xl mx-auto mb-10">
-              <DropZone onFilesAdded={handleFileUpload} />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
-              <div className="space-y-6">
-                <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
+          <div className="space-y-6">
+            {/* File Upload Section */}
+            <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
+              {files.length === 0 ? (
+                <DropZone onFilesAdded={handleFileUpload} />
+              ) : (
+                <>
                   <div className="mb-6">
                     <DropZone onFilesAdded={handleFileUpload} />
                   </div>
@@ -53,9 +52,12 @@ const Index = () => {
                     files={files} 
                     onRemoveFile={removeFile} 
                   />
-                </div>
-              </div>
-              
+                </>
+              )}
+            </div>
+            
+            {/* Actions Section - Always below the file upload box */}
+            {files.length > 0 && (
               <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
                 <ActionPanel 
                   activeActions={activeActions}
@@ -72,8 +74,8 @@ const Index = () => {
                   hasActions={activeActions.length > 0}
                 />
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>
