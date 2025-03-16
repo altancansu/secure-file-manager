@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   FileType, 
@@ -5,7 +6,8 @@ import {
   CombineOptions, 
   ReduceOptions, 
   RenameOptions,
-  CompressOptions 
+  CompressOptions,
+  Action
 } from '@/types';
 import ActionButton from './ActionButton';
 import { 
@@ -14,6 +16,8 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 
 interface ActionPanelProps {
   onAddConvertAction: (options: ConvertOptions) => void;
@@ -27,6 +31,7 @@ interface ActionPanelProps {
   isProcessing: boolean;
   hasFiles: boolean;
   hasActions: boolean;
+  activeActions: Action[];
 }
 
 const ActionPanel: React.FC<ActionPanelProps> = ({
@@ -40,9 +45,11 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
   onRemoveAction,
   isProcessing,
   hasFiles,
-  hasActions
+  hasActions,
+  activeActions
 }) => {
-  const [activeAction, setActiveAction] = useState<string | null>(null);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [activeActionType, setActiveActionType] = useState<string | null>(null);
   
   const [convertOptions, setConvertOptions] = useState<ConvertOptions>({
     targetFormat: 'pdf',
@@ -69,18 +76,15 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
     format: 'zip'
   });
   
-  const toggleAction = (action: string) => {
-    if (activeAction === action) {
-      setActiveAction(null);
-    } else {
-      setActiveAction(action);
-    }
+  const handleActionSelect = (actionType: string) => {
+    setActiveActionType(actionType);
+    setShowActionMenu(false);
   };
   
   const handleAddAction = () => {
-    if (!activeAction) return;
+    if (!activeActionType) return;
     
-    switch (activeAction) {
+    switch (activeActionType) {
       case 'convert':
         onAddConvertAction(convertOptions);
         break;
@@ -98,94 +102,19 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
         break;
     }
     
-    setActiveAction(null);
+    setActiveActionType(null);
   };
   
-  const actionButtons = [
-    {
-      id: 'convert',
-      label: 'Convert file to other format',
-      icon: <FileUp className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Convert files to:</label>
-            <Select 
-              value={convertOptions.targetFormat}
-              onValueChange={(value) => setConvertOptions({ ...convertOptions, targetFormat: value })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="pdf">PDF</SelectItem>
-                <SelectItem value="docx">DOCX</SelectItem>
-                <SelectItem value="jpg">JPG</SelectItem>
-                <SelectItem value="png">PNG</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Conversion mode:</label>
-            <Select 
-              value={convertOptions.mode}
-              onValueChange={(value) => setConvertOptions({ 
-                ...convertOptions, 
-                mode: value as 'all' | 'individual' | 'selected' 
-              })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select mode" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="all">Convert all files</SelectItem>
-                <SelectItem value="individual">Convert files separately</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'combine',
-      label: 'Combine files together',
-      icon: <FilesIcon className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Combine mode:</label>
-            <Select 
-              value={combineOptions.mode}
-              onValueChange={(value) => setCombineOptions({ 
-                ...combineOptions, 
-                mode: value as 'sameFormat' | 'merge' | 'singlePdf' 
-              })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select mode" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="sameFormat">Combine same format files</SelectItem>
-                <SelectItem value="merge">Merge Excel workbooks</SelectItem>
-                <SelectItem value="singlePdf">Create single PDF file</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {(combineOptions.mode === 'sameFormat' || combineOptions.mode === 'singlePdf') && (
+  const renderActionConfiguration = () => {
+    switch (activeActionType) {
+      case 'convert':
+        return (
+          <div className="space-y-4 mt-4 animate-fade-in">
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Output format:</label>
+              <label className="text-xs text-muted-foreground">Convert files to:</label>
               <Select 
-                value={combineOptions.outputFormat}
-                onValueChange={(value) => setCombineOptions({ ...combineOptions, outputFormat: value })}
+                value={convertOptions.targetFormat}
+                onValueChange={(value) => setConvertOptions({ ...convertOptions, targetFormat: value })}
               >
                 <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
                   <SelectValue placeholder="Select format" />
@@ -193,265 +122,404 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
                 <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
                   <SelectItem value="pdf">PDF</SelectItem>
                   <SelectItem value="docx">DOCX</SelectItem>
-                  <SelectItem value="xls">XLS</SelectItem>
+                  <SelectItem value="jpg">JPG</SelectItem>
+                  <SelectItem value="png">PNG</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          )}
-          
-          {combineOptions.mode === 'singlePdf' && (
+            
             <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Output filename:</label>
-              <Input 
-                className="bg-dark-secondary border-dark-accent/30"
-                placeholder="combined_document"
-                value={combineOptions.outputName || ''}
-                onChange={(e) => setCombineOptions({ ...combineOptions, outputName: e.target.value })}
-              />
-            </div>
-          )}
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'reduce',
-      label: 'Reduce file size',
-      icon: <RefreshCw className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Optimization level:</label>
-            <Select 
-              value={reduceOptions.mode}
-              onValueChange={(value) => setReduceOptions({ 
-                ...reduceOptions, 
-                mode: value as 'optimize' | 'maximum' 
-              })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select level" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="optimize">Optimize for email</SelectItem>
-                <SelectItem value="maximum">Maximum compression</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          {reduceOptions.mode === 'optimize' && (
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Max file size:</label>
+              <label className="text-xs text-muted-foreground">Conversion mode:</label>
               <Select 
-                value={String(reduceOptions.maxSize)}
-                onValueChange={(value) => setReduceOptions({ ...reduceOptions, maxSize: Number(value) })}
+                value={convertOptions.mode}
+                onValueChange={(value) => setConvertOptions({ 
+                  ...convertOptions, 
+                  mode: value as 'all' | 'individual' | 'selected' 
+                })}
               >
                 <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                  <SelectValue placeholder="Select size" />
+                  <SelectValue placeholder="Select mode" />
                 </SelectTrigger>
                 <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                  <SelectItem value="5">under 5MB</SelectItem>
-                  <SelectItem value="10">under 10MB</SelectItem>
-                  <SelectItem value="25">under 25MB</SelectItem>
+                  <SelectItem value="all">Convert all files</SelectItem>
+                  <SelectItem value="individual">Convert files separately</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          )}
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'resize',
-      label: 'Resize images',
-      icon: <ImageIcon className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <p className="text-sm text-muted-foreground">
-            Resize image files to reduce their dimensions and file size.
-          </p>
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'compress',
-      label: 'Compress files',
-      icon: <FileArchive className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Archive name:</label>
-            <Input 
-              className="bg-dark-secondary border-dark-accent/30"
-              placeholder="compressed_files"
-              value={compressOptions.outputName}
-              onChange={(e) => setCompressOptions({ ...compressOptions, outputName: e.target.value })}
-            />
           </div>
-          
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Format:</label>
-            <Select 
-              value={compressOptions.format}
-              onValueChange={(value) => setCompressOptions({ ...compressOptions, format: value as 'zip' })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select format" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="zip">ZIP</SelectItem>
-              </SelectContent>
-            </Select>
+        );
+        
+      case 'combine':
+        return (
+          <div className="space-y-4 mt-4 animate-fade-in">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Combine mode:</label>
+              <Select 
+                value={combineOptions.mode}
+                onValueChange={(value) => setCombineOptions({ 
+                  ...combineOptions, 
+                  mode: value as 'sameFormat' | 'merge' | 'singlePdf' 
+                })}
+              >
+                <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                  <SelectValue placeholder="Select mode" />
+                </SelectTrigger>
+                <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                  <SelectItem value="sameFormat">Combine same format files</SelectItem>
+                  <SelectItem value="merge">Merge Excel workbooks</SelectItem>
+                  <SelectItem value="singlePdf">Create single PDF file</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {(combineOptions.mode === 'sameFormat' || combineOptions.mode === 'singlePdf') && (
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Output format:</label>
+                <Select 
+                  value={combineOptions.outputFormat}
+                  onValueChange={(value) => setCombineOptions({ ...combineOptions, outputFormat: value })}
+                >
+                  <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="docx">DOCX</SelectItem>
+                    <SelectItem value="xls">XLS</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+            
+            {combineOptions.mode === 'singlePdf' && (
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Output filename:</label>
+                <Input 
+                  className="bg-dark-secondary border-dark-accent/30"
+                  placeholder="combined_document"
+                  value={combineOptions.outputName || ''}
+                  onChange={(e) => setCombineOptions({ ...combineOptions, outputName: e.target.value })}
+                />
+              </div>
+            )}
           </div>
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
-    },
-    {
-      id: 'rename',
-      label: 'File renaming',
-      icon: <PenLine className="w-5 h-5" />,
-      component: (
-        <div className="space-y-4 mt-4 animate-fade-in">
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Rename mode:</label>
-            <Select 
-              value={renameOptions.mode}
-              onValueChange={(value) => setRenameOptions({ 
-                ...renameOptions, 
-                mode: value as 'addBefore' | 'addAfter' | 'replace'
-              })}
-            >
-              <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
-                <SelectValue placeholder="Select mode" />
-              </SelectTrigger>
-              <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
-                <SelectItem value="addBefore">Add text before file names</SelectItem>
-                <SelectItem value="addAfter">Add text after file names</SelectItem>
-                <SelectItem value="replace">Replace text in file names</SelectItem>
-              </SelectContent>
-            </Select>
+        );
+        
+      case 'reduce':
+        return (
+          <div className="space-y-4 mt-4 animate-fade-in">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Optimization level:</label>
+              <Select 
+                value={reduceOptions.mode}
+                onValueChange={(value) => setReduceOptions({ 
+                  ...reduceOptions, 
+                  mode: value as 'optimize' | 'maximum' 
+                })}
+              >
+                <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                  <SelectItem value="optimize">Optimize for email</SelectItem>
+                  <SelectItem value="maximum">Maximum compression</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {reduceOptions.mode === 'optimize' && (
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Max file size:</label>
+                <Select 
+                  value={String(reduceOptions.maxSize)}
+                  onValueChange={(value) => setReduceOptions({ ...reduceOptions, maxSize: Number(value) })}
+                >
+                  <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                    <SelectValue placeholder="Select size" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                    <SelectItem value="5">under 5MB</SelectItem>
+                    <SelectItem value="10">under 10MB</SelectItem>
+                    <SelectItem value="25">under 25MB</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
-          
-          <div className="space-y-2">
-            <label className="text-xs text-muted-foreground">Text to add:</label>
-            <Input 
-              className="bg-dark-secondary border-dark-accent/30"
-              placeholder={renameOptions.mode === 'addBefore' ? "Prefix-" : "-Suffix"}
-              value={renameOptions.text}
-              onChange={(e) => {
-                const text = e.target.value;
-                setRenameOptions({
-                  ...renameOptions,
-                  text,
-                  example: text ? `Example: ${
-                    renameOptions.mode === 'addBefore' ? 
-                    `${text}Filename.ext` : `Filename${text}.ext`
-                  }` : undefined
-                });
-              }}
-            />
+        );
+      
+      case 'rename':
+        return (
+          <div className="space-y-4 mt-4 animate-fade-in">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Rename mode:</label>
+              <Select 
+                value={renameOptions.mode}
+                onValueChange={(value) => setRenameOptions({ 
+                  ...renameOptions, 
+                  mode: value as 'addBefore' | 'addAfter' | 'replace'
+                })}
+              >
+                <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                  <SelectValue placeholder="Select mode" />
+                </SelectTrigger>
+                <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                  <SelectItem value="addBefore">Add text before file names</SelectItem>
+                  <SelectItem value="addAfter">Add text after file names</SelectItem>
+                  <SelectItem value="replace">Replace text in file names</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Text to add:</label>
+              <Input 
+                className="bg-dark-secondary border-dark-accent/30"
+                placeholder={renameOptions.mode === 'addBefore' ? "Prefix-" : "-Suffix"}
+                value={renameOptions.text}
+                onChange={(e) => {
+                  const text = e.target.value;
+                  setRenameOptions({
+                    ...renameOptions,
+                    text,
+                    example: text ? `Example: ${
+                      renameOptions.mode === 'addBefore' ? 
+                      `${text}Filename.ext` : `Filename${text}.ext`
+                    }` : undefined
+                  });
+                }}
+              />
+            </div>
+            
+            {renameOptions.example && (
+              <p className="text-xs text-muted-foreground">{renameOptions.example}</p>
+            )}
           </div>
-          
-          {renameOptions.example && (
-            <p className="text-xs text-muted-foreground">{renameOptions.example}</p>
-          )}
-          
-          <ActionButton 
-            onClick={handleAddAction}
-            label="Add Action"
-            icon={<Plus className="w-4 h-4" />}
-            variant="primary"
-          />
-        </div>
-      )
+        );
+      
+      case 'compress':
+        return (
+          <div className="space-y-4 mt-4 animate-fade-in">
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Archive name:</label>
+              <Input 
+                className="bg-dark-secondary border-dark-accent/30"
+                placeholder="compressed_files"
+                value={compressOptions.outputName}
+                onChange={(e) => setCompressOptions({ ...compressOptions, outputName: e.target.value })}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Format:</label>
+              <Select 
+                value={compressOptions.format}
+                onValueChange={(value) => setCompressOptions({ ...compressOptions, format: value as 'zip' })}
+              >
+                <SelectTrigger className="bg-dark-secondary border-dark-accent/30">
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent className="bg-dark-secondary/95 backdrop-blur-lg border-dark-accent/30">
+                  <SelectItem value="zip">ZIP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        );
+        
+      default:
+        return null;
     }
+  };
+  
+  const getActionTypeLabel = (type: string) => {
+    switch (type) {
+      case 'convert': return 'Convert file to other format';
+      case 'combine': return 'Combine files together';
+      case 'reduce': return 'Reduce file size';
+      case 'resize': return 'Resize images';
+      case 'compress': return 'Compress files';
+      case 'rename': return 'File renaming';
+      default: return type;
+    }
+  };
+  
+  const getActionDescription = (action: Action) => {
+    switch (action.type) {
+      case 'convert':
+        const convertOpts = action.options as ConvertOptions;
+        return `Convert files to ${convertOpts.targetFormat.toUpperCase()}`;
+      case 'combine':
+        const combineOpts = action.options as CombineOptions;
+        return combineOpts.mode === 'singlePdf' 
+          ? 'Create single PDF file' 
+          : 'Combine same format files';
+      case 'reduce':
+        const reduceOpts = action.options as ReduceOptions;
+        return reduceOpts.mode === 'optimize' 
+          ? `Optimize file size for email (${reduceOpts.maxSize}MB)` 
+          : 'Maximum compression';
+      case 'rename':
+        const renameOpts = action.options as RenameOptions;
+        return `${renameOpts.mode === 'addBefore' ? 'Add text before' : 'Add text after'} file names`;
+      case 'compress':
+        return 'Compress files to ZIP archive';
+      default:
+        return action.type;
+    }
+  };
+  
+  const actionOptions = [
+    { id: 'convert', label: 'Convert file to other format', icon: <FileUp className="w-5 h-5" /> },
+    { id: 'resize', label: 'Resize images', icon: <ImageIcon className="w-5 h-5" /> },
+    { id: 'combine', label: 'Combine files together', icon: <FilesIcon className="w-5 h-5" /> },
+    { id: 'reduce', label: 'Reduce file size', icon: <RefreshCw className="w-5 h-5" /> },
+    { id: 'compress', label: 'Compress files', icon: <FileArchive className="w-5 h-5" /> },
+    { id: 'rename', label: 'File renaming', icon: <PenLine className="w-5 h-5" /> },
   ];
   
   return (
     <div className="space-y-6">
-      {!activeAction && (
-        <div className="space-y-2 animate-fade-in">
-          <label className="text-sm text-muted-foreground">
-            Please select what you want
-          </label>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {actionButtons.map((button) => (
-              <ActionButton
-                key={button.id}
-                onClick={() => toggleAction(button.id)}
-                label={button.label}
-                icon={button.icon}
-                className="justify-start text-left"
-                disabled={!hasFiles}
-              />
-            ))}
-          </div>
+      {/* Added Actions */}
+      {activeActions.length > 0 && (
+        <div className="space-y-4">
+          {activeActions.map((action, index) => (
+            <div 
+              key={index} 
+              className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-4 border border-dark-accent/10"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-medium">{getActionTypeLabel(action.type)}</span>
+                <button 
+                  onClick={() => onRemoveAction(index)}
+                  className="p-1.5 text-muted-foreground hover:text-white rounded-full 
+                  transition-colors"
+                  aria-label="Remove action"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <p className="text-sm text-muted-foreground mb-3">
+                {getActionDescription(action)}
+              </p>
+              
+              {action.type === 'convert' && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  <Select defaultValue="pdf" disabled>
+                    <SelectTrigger className="w-24 h-9 text-sm">
+                      <SelectValue placeholder="Format" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pdf">PDF</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
       
-      {activeAction && (
-        <div className="action-panel animate-scale-in">
+      {/* Action Selection */}
+      {!activeActionType && (
+        <>
+          {activeActions.length === 0 ? (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Please select what you want</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {actionOptions.map((option) => (
+                  <ActionButton
+                    key={option.id}
+                    onClick={() => handleActionSelect(option.id)}
+                    label={option.label}
+                    icon={option.icon}
+                    className="justify-start text-left"
+                    disabled={!hasFiles}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Add other options</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                {actionOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleActionSelect(option.id)}
+                    disabled={!hasFiles}
+                    className="flex items-center justify-center space-x-2 py-3 px-4 
+                    bg-dark-secondary/50 hover:bg-dark-secondary/80
+                    border border-dark-accent/10 rounded-lg
+                    transition-colors disabled:opacity-50"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+      
+      {/* Action Configuration */}
+      {activeActionType && (
+        <div className="bg-dark-secondary/90 backdrop-blur-md rounded-xl p-4 shadow-lg border border-dark-accent/20 animate-scale-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-medium">
-              {actionButtons.find(b => b.id === activeAction)?.label}
+              {getActionTypeLabel(activeActionType)}
             </h3>
-            <ActionButton
-              onClick={() => setActiveAction(null)}
-              label="Cancel"
-              variant="ghost"
-              size="sm"
-            />
+            <button 
+              onClick={() => setActiveActionType(null)}
+              className="p-2 text-muted-foreground hover:text-white rounded-lg
+              transition-colors"
+            >
+              Cancel
+            </button>
           </div>
           
-          {actionButtons.find(b => b.id === activeAction)?.component}
+          {renderActionConfiguration()}
+          
+          <div className="mt-4">
+            <button
+              onClick={handleAddAction}
+              className="flex items-center justify-center space-x-2 w-full py-2.5 px-4
+              bg-highlight-purple hover:bg-highlight-purple/90 
+              text-white rounded-lg transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Action</span>
+            </button>
+          </div>
         </div>
       )}
       
+      {/* Action Controls */}
       <div className="flex justify-between items-center pt-6 border-t border-dark-accent/20">
-        <div className="flex space-x-2">
-          <ActionButton
-            onClick={onSaveActionSet}
-            label="Save this action set"
-            icon={<Save className="w-4 h-4" />}
-            variant="ghost"
-            disabled={!hasActions}
-          />
-        </div>
+        <button
+          onClick={onSaveActionSet}
+          disabled={!hasActions}
+          className="flex items-center space-x-2 p-2 text-muted-foreground
+          hover:text-white transition-colors disabled:opacity-50"
+        >
+          <Save className="w-4 h-4" />
+          <span>Save this action set</span>
+        </button>
         
-        <ActionButton
+        <button
           onClick={onProcessActions}
-          label="Process & Download"
-          icon={<Download className="w-4 h-4" />}
-          variant="primary"
           disabled={isProcessing || !hasActions}
-        />
+          className="flex items-center space-x-2 py-2.5 px-5
+          bg-highlight-purple hover:bg-highlight-purple/90 
+          text-white rounded-lg transition-colors disabled:opacity-50"
+        >
+          <Download className="w-4 h-4" />
+          <span>Process & Download</span>
+        </button>
       </div>
     </div>
   );

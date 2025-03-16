@@ -1,11 +1,9 @@
+
 import React from 'react';
 import { FileItem as FileItemType } from '@/types';
 import { formatFileSize } from '@/lib/fileUtils';
-import { Trash2 } from 'lucide-react';
-import { 
-  FileText, FileJson, FileSpreadsheet, ImageIcon, 
-  CheckCircle2
-} from 'lucide-react';
+import { Trash2, CheckCircle2 } from 'lucide-react';
+import { FileText, FileJson, FileSpreadsheet, ImageIcon } from 'lucide-react';
 
 interface FileItemProps {
   file: FileItemType;

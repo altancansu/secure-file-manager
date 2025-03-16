@@ -58,6 +58,7 @@ const Index = () => {
               
               <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-accent/10">
                 <ActionPanel 
+                  activeActions={activeActions}
                   onAddConvertAction={addConvertAction}
                   onAddCombineAction={addCombineAction}
                   onAddReduceSizeAction={addReduceSizeAction}
