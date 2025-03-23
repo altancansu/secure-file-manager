@@ -1,6 +1,6 @@
 
 import React, { useCallback, useState } from 'react';
-import { File, Upload } from 'lucide-react';
+import { Upload } from 'lucide-react';
 
 interface DropZoneProps {
   onFilesAdded: (files: FileList | File[]) => void;
@@ -41,10 +41,16 @@ const DropZone: React.FC<DropZoneProps> = ({ onFilesAdded }) => {
   
   return (
     <div 
-      className={`file-drop-zone ${isDragging ? 'active' : ''} animate-fade-in`}
+      className={`
+        flex flex-col items-center justify-center py-10 px-6
+        border-2 border-dashed border-dark-accent/50 rounded-lg
+        ${isDragging ? 'border-highlight-purple bg-dark-secondary/40' : 'bg-dark-secondary/20'}
+        transition-all duration-200 cursor-pointer
+      `}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onClick={() => document.getElementById('file-input')?.click()}
     >
       <input 
         type="file" 
@@ -55,23 +61,17 @@ const DropZone: React.FC<DropZoneProps> = ({ onFilesAdded }) => {
         accept=".docx,.pdf,.xls,.xlsx,.png,.jpg,.jpeg"
       />
       
-      <div className="p-4 bg-dark-accent/20 rounded-full mb-6">
-        <File className="w-10 h-10 text-highlight-purple animate-float" strokeWidth={1.5} />
+      <Upload 
+        className="w-12 h-12 text-highlight-purple mb-4 opacity-80" 
+        strokeWidth={1.5} 
+      />
+      
+      <div className="text-center">
+        <h3 className="text-lg font-medium mb-1">Click or drop your files here</h3>
+        <p className="text-sm text-muted-foreground">
+          DOCX, PDF, XLS, PNG formats are supported
+        </p>
       </div>
-      
-      <h3 className="text-xl font-medium mb-2">Click or drop your files here</h3>
-      <p className="text-sm text-muted-foreground mb-4">
-        DOCX, PDF, XLS, PNG formats are supported
-      </p>
-      
-      <label 
-        htmlFor="file-input"
-        className="px-4 py-2 bg-highlight-purple hover:bg-highlight-purple/90 
-        rounded-lg transition-all duration-200 cursor-pointer flex items-center"
-      >
-        <Upload className="w-4 h-4 mr-2" />
-        <span>Select Files</span>
-      </label>
     </div>
   );
 };
