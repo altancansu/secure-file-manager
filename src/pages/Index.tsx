@@ -56,7 +56,7 @@ const Index = () => {
               )}
             </div>
             
-            {/* Actions Section - Outside of container as individual buttons */}
+            {/* Actions Section */}
             {files.length > 0 && (
               <ActionPanel 
                 activeActions={activeActions}

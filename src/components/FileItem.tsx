@@ -98,7 +98,7 @@ const FileItem: React.FC<FileItemProps> = ({ file, onRemove }) => {
         )}
       </div>
       
-      <div className="text-xs text-right">{formatFileSize(size)}</div>
+      <div className="text-xs">{formatFileSize(size)}</div>
       
       <button 
         onClick={() => onRemove(id)}
