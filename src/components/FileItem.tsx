@@ -42,23 +42,35 @@ const FileItem: React.FC<FileItemProps> = ({ file, onRemove }) => {
         return 'bg-slate-500';
     }
   };
+
+  const getFileTypeLabel = () => {
+    switch (type) {
+      case 'docx':
+        return 'DOCX';
+      case 'pdf':
+        return 'PDF';
+      case 'xls':
+        return 'XLS';
+      case 'png':
+        return 'PNG';
+      default:
+        return type.toUpperCase();
+    }
+  };
   
   return (
-    <div className="file-item animate-slide-up group">
-      <div className={`file-icon ${getFileTypeColor()}`}>
+    <div className="file-item animate-slide-up group grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-3 py-2 rounded-lg hover:bg-dark-secondary/50">
+      <div className={`file-icon ${getFileTypeColor()} flex items-center justify-center w-10 h-10 rounded-lg`}>
         {getFileIcon()}
       </div>
       
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
+      <div className="min-w-0">
+        <div className="mb-1">
           <p className="text-sm font-medium truncate">{name}</p>
-          <span className="text-xs text-muted-foreground ml-2">
-            {formatFileSize(size)}
-          </span>
         </div>
         
         {progress > 0 && (
-          <div className="progress-bar">
+          <div className="progress-bar mt-1">
             {progress < 100 ? (
               <div 
                 className="progress-bar-fill transition-all duration-300 ease-out" 
@@ -71,7 +83,7 @@ const FileItem: React.FC<FileItemProps> = ({ file, onRemove }) => {
         )}
         
         {progress > 0 && (
-          <div className="flex items-center justify-between mt-1">
+          <div className="flex items-center mt-1">
             <span className="text-xs text-muted-foreground">
               {isComplete ? (
                 <span className="flex items-center text-highlight-purple">
@@ -86,10 +98,12 @@ const FileItem: React.FC<FileItemProps> = ({ file, onRemove }) => {
         )}
       </div>
       
+      <div className="text-xs text-right">{formatFileSize(size)}</div>
+      
       <button 
         onClick={() => onRemove(id)}
         className="p-2 text-muted-foreground hover:text-white rounded-full 
-        transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+        transition-colors opacity-70 hover:opacity-100 focus:opacity-100"
         aria-label="Remove file"
       >
         <Trash2 className="w-4 h-4" />

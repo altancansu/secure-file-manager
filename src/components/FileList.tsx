@@ -32,7 +32,8 @@ const FileList: React.FC<FileListProps> = ({ files, onRemoveFile }) => {
   
   return (
     <div className="space-y-1 animate-fade-in">
-      <div className="grid grid-cols-[1fr_80px_80px] gap-4 px-3 py-2 text-xs text-muted-foreground">
+      <div className="grid grid-cols-[auto_1fr_auto_auto] gap-4 px-3 py-2 text-xs text-muted-foreground">
+        <div>Format</div>
         <div>File name</div>
         <div className="text-right">Size</div>
         <div className="text-right">Delete</div>
